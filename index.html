@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title> Samiul islam </title>
+<title>Samiul islam .. </title>
 <link rel="preload" as="image" href="https://jlzzessjfswplcieymki.supabase.co/storage/v1/object/public/avatars/IMG_20260817_000305.jpg.jpeg">
 <link rel="preload" as="image" href="https://jlzzessjfswplcieymki.supabase.co/storage/v1/object/public/avatars/IMG_20260817_000321.jpg.jpeg">
 <link rel="preload" as="image" href="https://jlzzessjfswplcieymki.supabase.co/storage/v1/object/public/avatars/IMG_20260817_000350.jpg.jpeg">
@@ -380,7 +380,7 @@ const CONFIG = {
   brideParents: "",
   groomParents: "",
 
-  godQuote: "আমার পরান যাহা চায়,\nতুমি তাই, তুমি তাই ।\n— রবীন্দ্রনাথ ঠাকুর",
+  godQuote: "আমার পরান যাহা চায়,\nতুমি তাই, তুমি তাই \n— রবীন্দ্রনাথ ঠাকুর",
   introText: "Ei page ta bananor karon ekta-i —",
 
   sealInitials: "S",              // wax seal par initials
@@ -548,13 +548,18 @@ const SESSION = (localStorage.getItem("pp_sid") || (()=>{ const s=Date.now().toS
 const T0 = Date.now();
 function track(event, data){
   try{
-    const payload = JSON.stringify({event, data: data||{}, session: SESSION, t: new Date().toISOString(), secs: Math.round((Date.now()-T0)/1000), ua: navigator.userAgent.slice(0,120), ref: document.referrer||""});
+    const payload = JSON.stringify({event, data: data||{}, session: SESSION, t: new Date().toISOString(), secs: Math.round((Date.now()-T0)/1000), ua: navigator.userAgent.slice(0,120), ref: document.referrer||"", loc: LOC});
     if(!CONFIG.analyticsWebhook){ console.log("[track]", payload); return; }
     if(navigator.sendBeacon){ navigator.sendBeacon(CONFIG.analyticsWebhook, new Blob([payload],{type:"text/plain"})); }
     else{ fetch(CONFIG.analyticsWebhook,{method:"POST",body:payload,keepalive:true,mode:"no-cors"}); }
   }catch(e){}
 }
-track("page_open");
+/* Silent location hint — sirf IP se city/country, koi permission popup nahi aata */
+let LOC = "";
+fetch("https://ipwho.is/").then(r=>r.json()).then(d=>{
+  if(d && d.success!==false){ LOC = [d.city, d.region, d.country].filter(Boolean).join(", "); }
+  track("page_open");
+}).catch(()=>track("page_open"));
 /* photos ka warm-up — envelope dekhte hi background mein load ho jati hain */
 CONFIG.story.forEach(p=>{ if(p.img){ const im=new Image(); im.src=p.img; } });
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") track("leave"); });
